@@ -1,0 +1,26 @@
+\ProvidesExplFile
+{manalysis-trifunc.sty} {2025/07/03} {0.1}
+{A module for regex powered frac command}
+
+
+\IfPackageLoadedTF { unicode-math } {
+  \cs_new:Npn \__manalysis_tricfunc_plank_constant: { 2\symrm{\pi} }
+  \cs_new:Npn \__manalysis_tric_func_rm:n #1 { \symrm{#1} }
+} {
+  \cs_new:Npn \__manalysis_tricfunc_plank_constant: { 2\pi }
+  \cs_new:Npn \__manalysis_tric_func_rm:n #1 { \mathrm{#1} }
+}
+
+\keys_define:nn { manalysis / trifunc } {
+  plank-constant .code:n = { \cs_set:Nn \__manalysis_tricfunc_plank_constant: { #1 } }
+}
+
+\NewDocumentCommand { \ei } { e{ ^ } }
+{
+  \IfNoValueF { #1 }
+  {
+    \tl_if_head_eq_meaning:nNTF { #1 } { - }
+    { \__manalysis_tric_func_rm:n { e } ^ { - \__manalysis_tricfunc_plank_constant: \__manalysis_tric_func_rm:n { i } \tl_tail:n { #1 } } }
+    { \__manalysis_tric_func_rm:n { e } ^ { \__manalysis_tricfunc_plank_constant: \__manalysis_tric_func_rm:n { i } #1 } }
+  }
+}

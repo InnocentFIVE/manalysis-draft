@@ -1,0 +1,54 @@
+\ProvidesExplFile
+{manalysis-pms.sty} {2025/07/03} {0.1}
+{A~module~for~regex~powered~frac~command}
+
+\RequirePackage{tikz}
+\RequirePackage{l3draw}
+
+\bool_new:N \g__manalysis_pms_tikz_bool
+\bool_new:N \l__manalysis_pms_math
+% \bool_set_true:N \g__manalysis_pms_tikz_bool
+
+
+
+\cs_new:Nn \__manalysis_pm_slant:nn {
+	\bool_if:nTF \g__manalysis_pms_tikz_bool {
+		\tikz [
+			inner~sep = 0pt,
+			baseline 	= 0pt
+		] { \node [xslant = \fp_use:N \l__manalysis_tmpa_fp] (X) at (0, 0) { $ #1#2 $ }; }
+	} {
+		\draw_begin:
+		\hbox_set:Nn \l_tmpa_box { $ #1 {#2} $ }
+		\draw_path_moveto:n  { 0 pt , 0 pt }
+		\draw_transform_xslant:n  { \l__manalysis_tmpa_fp }
+		\draw_baseline:n  {  0 pt  }
+		\bool_if:NT \l__manalysis_pms_math {
+			\box_set_wd:Nn \l_tmpa_box {
+				\dim_eval:n {
+					\box_wd:N \l_tmpa_box -
+					\fp_abs:n { \l__manalysis_tmpa_fp } \box_ht:N \l_tmpa_box
+				}
+			}
+		}
+		\draw_box_use:N \l_tmpa_box
+		\draw_end:
+	}
+}
+
+
+\NewDocumentCommand { \pms }  { O{ 0.16666 } m o }  {
+	\if_mode_math:
+	\bool_set_true:N \l__manalysis_pms_math
+	\IfNoValueTF { #3 } {
+		\fp_set:Nn \l__manalysis_tmpa_fp { #1 }
+		\__manalysis_mathpalette:nn \__manalysis_pm_slant:nn { #2 }
+	} {
+		\fp_set:Nn \l__manalysis_tmpa_fp { #1 }
+		\__manalysis_pm_slant:nn { #3 } { #2 }
+	}
+	\else:
+	\fp_set:Nn \l__manalysis_tmpa_fp { #1 }
+	\__manalysis_pm_slant:nn { \tex_hbox:D } { #2 }
+	\fi:
+}

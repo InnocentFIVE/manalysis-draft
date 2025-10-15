@@ -1,0 +1,368 @@
+\ProvidesExplFile
+{manalysis-paren-lua.sty} {2025/07/03} {0.1}
+{A~module~for~regex~powered~frac~command}
+
+\RequirePackage{mathtools}
+
+\cs_new:Nn \__manalysis_compress_ht_of_norm:n { }
+\cs_new:Nn \__manalysis_put_in_paren:nn { }
+
+\dim_new:N \l__manalysis_f_size_dim
+\dim_new:N \delimdim
+
+\msg_new:nnn { manalysis } { non-lua }
+{ The key `#1'~can~not~be~used~in~LuaTeX }
+
+\keys_define:nn { manalysis / paren } {
+  compress-ht .cs_set:Np  = \__manalysis_compress_ht_of_norm:n #1,
+  fuzzy       .code:n     = \exp_args:Nnnf \msg_error:nnn { manalysis } { non-lua } { \l_keys_path_str }
+}
+
+
+\cs_set:Nn \__manalysis_compress_ht_of_norm:n {
+  \dim_max:nn {
+    \dim_min:nn {
+      0.3 #1 + 0.4 em
+    } {
+      0.8 #1
+    }
+  } { #1 - 0.8 em }
+}
+
+\cs_new:Nn \__manalysis_relax:N { \tex_let:D #1 \tex_relax:D }
+
+\cs_new:Nn \__manalysis_if_math_delimiter:NTF {
+  \exp_after:wN \tl_set:Nn
+  \exp_after:wN \l_tmpa_tl
+  \exp_after:wN { \exp:w \exp_end_continue_f:w #1 \scan_stop: }
+  \cs_set_nopar:Npx \l_tmpa_tl { \tl_head:N \l_tmpa_tl }
+
+  \if_catcode:w \l_tmpa_tl \scan_stop:
+  \exp_after:wN \token_if_eq_meaning:NNTF \l_tmpa_tl \tex_delimiter:D
+  { #2 } { #3 }
+  \else:
+  \int_compare:nNnTF { \tex_delcode:D \exp_after:wN ` \l_tmpa_tl } > 0
+    { #2 } { #3 }
+  \fi:
+}
+
+\cs_new:Npn \__manalysis_paren_set_fuzzy: {
+  \cs_if_exist:NT \__manalysis_bigop_fuzzy_star:nnnnn {
+    \cs_set_eq:NN \__manalysis_big_operator_star:nnnnn \__manalysis_bigop_fuzzy_star:nnnnn
+    \cs_set_eq:NN \__manalysis_bigop_mathpalette_no_star:nnnn \use_iii:nnnn
+  }
+  \tl_map_function:NN \g__manalysis_accent_relax \__manalysis_relax:N
+}
+
+\NewDocumentCommand { \DeclareSet } { mmmmmm } {
+  \cs_if_exist:NTF #3 { } {	\cs_new:Npn #3 { } }
+
+  \exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _no_star }
+  { oO { #2 } m } {
+    \IfNoValueTF { ##1 } {
+      \hbox_set:Nn \l_tmpa_box { }
+      \__manalysis_mathchoice:nnnn {
+        \cs_set_eq:NN \mstyle \tex_displaystyle:D
+        \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_displaystyle:D ##3 $ }
+        \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_displaystyle:D \vcenter{} $ }
+      } {
+        \cs_set_eq:NN \mstyle \tex_textstyle:D
+        \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_textstyle:D ##3 $ }
+        \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_textstyle:D \vcenter{} $ }
+      } {
+        \cs_set_eq:NN \mstyle \tex_scriptstyle:D
+        \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptstyle:D ##3 $ }
+        \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_scriptstyle:D \vcenter{} $ }
+      } {
+        \cs_set_eq:NN \mstyle \tex_scriptscriptstyle:D
+        \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptscriptstyle:D ##3 $ }
+        \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_scriptscriptstyle:D \vcenter{} $ }
+      }
+      \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+      \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+      \dim_set:Nn \l__manalysis_tmpa_dim {
+        \dim_max:nn
+        { \l_tmpa_dim - \box_ht:N \l__manalysis_tmpa_box }
+        { \l_tmpb_dim + \box_ht:N \l__manalysis_tmpa_box }
+      }
+      \box_set_ht:Nn \l_tmpa_box { \__manalysis_compress_ht_of_norm:n { \l__manalysis_tmpa_dim } + \box_ht:N \l__manalysis_tmpa_box }
+      \dim_set:Nn \delimdim { \__manalysis_compress_ht_of_norm:n { \l__manalysis_tmpa_dim } + \box_ht:N \l__manalysis_tmpa_box }
+      \dim_compare:nNnT \delimdim > { \l__manalysis_tmpa_dim + \box_ht:N \l__manalysis_tmpa_box } {
+          \tex_expanded:D {
+            \exp_not:N \msg_warning:nnnn { manlaysis } { uncompress-ht }
+            { \dim_to_decimal:n { \delimdim - \box_ht:N \l__manalysis_tmpa_box }~pt } { \dim_to_decimal:n { \l__manalysis_tmpa_dim }~pt }
+          }
+        }
+      \tl_map_inline:nn { #5 } {
+        \tex_mathopen:D {
+          \__manalysis_paren_set_fuzzy:
+          \__manalysis_if_math_delimiter:NTF ####1 {
+              \tex_mathopen:D {
+                \tex_left:D ####1
+                \box_use:N \l_tmpa_box
+                \tex_right:D .
+                \tex_kern:D -\tex_nulldelimiterspace:D
+              }
+            } { ####1 }
+        }
+      }
+      \cs_set:Npn #3 { ##2 #4 ##2 \tex_mathopen:D { } }
+      \tl_if_in:nnTF { ##3 } { #3 }
+      { ##2 ##3 ##2 }
+      { ##3 }
+      \tl_map_inline:nn { #6 } {
+        \tex_mathclose:D {
+          \__manalysis_paren_set_fuzzy:
+          \__manalysis_if_math_delimiter:NTF ####1 {
+              \tex_mathclose:D {
+                \tex_kern:D -\tex_nulldelimiterspace:D
+                \tex_left:D .
+                \box_use:N \l_tmpa_box
+                \tex_right:D ####1
+              }
+            } { ####1 }
+        }
+      }
+    } {
+      \__manalysis_mathchoice:nnnn
+      { \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_displaystyle:D \vcenter{} $ } }
+      { \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_textstyle:D \vcenter{} $ } }
+      { \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_scriptstyle:D \vcenter{} $ } }
+      { \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_scriptscriptstyle:D \vcenter{} $ } }
+      \hbox_set:Nn \l_tmpa_box { $ ##1. $ }
+      \dim_set:Nn \l_tmpa_dim { \dim_max:nn { \box_ht:N \l_tmpa_box - \box_ht:N \l__manalysis_tmpa_box } { \box_ht:N \l_tmpa_box + \box_ht:N \l__manalysis_tmpa_box } }
+      \dim_set:Nn \delimdim { \__manalysis_compress_ht_of_norm:n { \l__manalysis_tmpa_dim } + \box_ht:N \l__manalysis_tmpa_box }
+      \dim_compare:nNnT \delimdim > { \l__manalysis_tmpa_dim + \box_ht:N \l__manalysis_tmpa_box } {
+          \tex_expanded:D {
+            \exp_not:N \msg_warning:nnnn { manlaysis } { uncompress-ht }
+            { \dim_to_decimal:n { \delimdim - \box_ht:N \l__manalysis_tmpa_box }~pt } { \dim_to_decimal:n { \l__manalysis_tmpa_dim }~pt }
+          }
+        }
+      % \tex_mathopen:D ##1 #5
+      \tl_map_inline:nn { #5 } {
+        \tex_mathopen:D {
+          \__manalysis_paren_set_fuzzy:
+          \__manalysis_if_math_delimiter:NTF ####1 { \tex_mathopen:D ##1 ####1 } { ####1 }
+        }
+      }
+      \cs_set:Npn #3 { ##2 #4 ##2 \tex_mathopen:D { } }
+      ##2 ##3 ##2
+      % \tex_mathclose:D ##1 #6
+      \tl_map_inline:nn { #6 } {
+        \tex_mathopen:D {
+          \__manalysis_paren_set_fuzzy:
+          \__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
+        }
+      }
+    }
+    \dim_set:Nn \delimdim { \c_zero_dim }
+  }
+
+  \exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _star }
+  { O { #2 } m } {
+    \hbox_set:Nn \l_tmpa_box { }
+    \__manalysis_mathchoice:nnnn {
+      \cs_set_eq:NN \mstyle \tex_displaystyle:D
+      \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_displaystyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_displaystyle:D \vcenter{} $ }
+    } {
+      \cs_set_eq:NN \mstyle \tex_textstyle:D
+      \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_textstyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_textstyle:D \vcenter{} $ }
+    } {
+      \cs_set_eq:NN \mstyle \tex_scriptstyle:D
+      \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptstyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_scriptstyle:D \vcenter{} $ }
+    } {
+      \cs_set_eq:NN \mstyle \tex_scriptscriptstyle:D
+      \hbox_set:Nn \l_tmpb_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptscriptstyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { $ \tex_scriptscriptstyle:D \vcenter{} $ }
+    }
+
+
+    \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+    \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+    \dim_set:Nn \l__manalysis_tmpa_dim {
+      \dim_max:nn
+      { \l_tmpa_dim - \box_ht:N \l__manalysis_tmpa_box }
+      { \l_tmpb_dim + \box_ht:N \l__manalysis_tmpa_box }
+    }
+    \dim_set:Nn \delimdim { \l__manalysis_tmpa_dim + \box_ht:N \l__manalysis_tmpa_box }
+    \box_set_ht:Nn \l_tmpa_box { \delimdim }
+    \cs_set:Npn #3 { ##1 #4 ##1 \tex_mathopen:D { } }
+    % \tex_mathopen:D { }
+    %  \tex_left:D #5
+    \tl_map_inline:nn { #5 } {
+      \tex_mathopen:D {
+        \__manalysis_paren_set_fuzzy:
+        \__manalysis_if_math_delimiter:NTF ####1 {
+            \tex_mathopen:D {
+              \tex_left:D ####1
+              \box_use:N \l_tmpa_box
+              \tex_right:D .
+              \tex_kern:D -\tex_nulldelimiterspace:D
+            }
+          } { ####1 }
+      }
+    }
+    \tl_if_in:nnTF { ##2 } { #3 }
+    { ##1 ##2 ##1 }
+    { ##2 }
+    \tl_map_inline:nn { #6 } {
+      \tex_mathclose:D {
+        \__manalysis_paren_set_fuzzy:
+        \__manalysis_if_math_delimiter:NTF ####1 {
+            \tex_mathclose:D {
+              \tex_kern:D -\tex_nulldelimiterspace:D
+              \tex_left:D .
+              \box_use:N \l_tmpa_box
+              \tex_right:D ####1
+            }
+          } { ####1 }
+      }
+    }
+  }
+
+  \NewDocumentCommand { #1 } { s } {
+    \IfBooleanTF { ##1 }
+    { \use:c { __manalysis_ \cs_to_str:N #1 _star } }
+    { \use:c { __manalysis_ \cs_to_str:N #1 _no_star } }
+  }
+}
+
+
+
+\NewDocumentCommand { \DeclareParen } { mmm } {
+  \exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _no_star }
+  { om } {
+    \hbox_set:Nn \l_tmpa_box { }
+    \__manalysis_mathchoice:nnnn {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_displaystyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_displaystyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_displaystyle:D ##2 $ }
+    } {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_textstyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_textstyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_textstyle:D ##2 $ }
+    } {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_scriptstyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_scriptstyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptstyle:D ##2 $ }
+    } {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_scriptscriptstyle:D ##2 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_scriptscriptstyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptscriptstyle:D ##2 $ }
+    }
+    \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+    \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+    \IfNoValueTF { ##1 } {
+      \dim_set:Nn \l__manalysis_tmpa_dim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l__manalysis_tmpb_box } { \l_tmpb_dim + \box_ht:N \l__manalysis_tmpb_box } }
+      \box_set_ht:Nn \l_tmpa_box { \__manalysis_compress_ht_of_norm:n { \l__manalysis_tmpa_dim } + \box_ht:N \l__manalysis_tmpb_box }
+      \tex_mathopen:D {
+        \__manalysis_paren_set_fuzzy:
+        \tl_map_inline:nn { #2 } {
+          \__manalysis_if_math_delimiter:NTF ####1 {
+              \tex_mathopen:D {
+                \tex_left:D ####1
+                \box_use:N \l_tmpa_box
+                \tex_right:D .
+                \tex_kern:D -\tex_nulldelimiterspace:D
+              }
+            } { ####1 }
+        }
+      }
+      \box_use:N \l_tmpb_box
+      \tex_mathclose:D {
+        \__manalysis_paren_set_fuzzy:
+        \tl_map_inline:nn { #3 } {
+          \__manalysis_if_math_delimiter:NTF ####1 {
+              \tex_mathclose:D {
+                \tex_kern:D -\tex_nulldelimiterspace:D
+                \tex_left:D .
+                \box_use:N \l_tmpa_box
+                \tex_right:D ####1
+              }
+            } { ####1 }
+        }
+      }
+    } {
+      \tex_mathopen:D {
+        \__manalysis_paren_set_fuzzy:
+        \tl_map_inline:nn { #2 } {
+          \__manalysis_if_math_delimiter:NTF ####1 {
+              \tex_mathopen:D ##1 ####1
+            } { ####1 }
+        }
+      }
+      \box_use:N \l_tmpb_box
+      \tex_mathclose:D {
+        \__manalysis_paren_set_fuzzy:
+        \tl_map_inline:nn { #3 } {
+          \__manalysis_if_math_delimiter:NTF ####1 {
+              \tex_mathclose:D ##1 ####1
+            } { ####1 }
+        }
+      }
+    }
+  }
+  \exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _star }
+  { m } {
+    \hbox_set:Nn \l_tmpa_box { }
+    \__manalysis_mathchoice:nnnn {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_displaystyle:D ##1 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_displaystyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_displaystyle:D ##1 $ }
+    } {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_textstyle:D ##1 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_textstyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_textstyle:D ##1 $ }
+    } {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_scriptstyle:D ##1 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_scriptstyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptstyle:D ##1 $ }
+    } {
+      \hbox_set:Nn \l_tmpb_box { $ \tex_scriptscriptstyle:D ##1 $ }
+      \hbox_set:Nn \l__manalysis_tmpb_box { $ \tex_scriptscriptstyle:D \vcenter{} $ }
+      \hbox_set:Nn \l__manalysis_tmpa_box { \__manalysis_paren_set_fuzzy: $ \tex_scriptscriptstyle:D ##1 $ }
+    }
+
+    \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+    \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+    \dim_set:Nn \l__manalysis_tmpa_dim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l__manalysis_tmpb_box } { \l_tmpb_dim + \box_ht:N \l__manalysis_tmpb_box } }
+    \box_set_ht:Nn \l_tmpa_box { \l__manalysis_tmpa_dim + \box_ht:N \l__manalysis_tmpb_box }
+
+    \tex_mathopen:D {
+      \__manalysis_paren_set_fuzzy:
+      \tl_map_inline:nn { #2 } {
+        \__manalysis_if_math_delimiter:NTF ####1 {
+            \tex_mathopen:D {
+              \tex_left:D ####1
+              \box_use:N \l_tmpa_box
+              \tex_right:D . \tex_kern:D -\tex_nulldelimiterspace:D
+            }
+          } { ####1 }
+      }
+    }
+    \box_use:N \l_tmpb_box
+    \tex_mathclose:D {
+      \__manalysis_paren_set_fuzzy:
+      \tl_map_inline:nn { #3 } {
+        \__manalysis_if_math_delimiter:NTF ####1 {
+            \tex_mathclose:D {
+              \tex_kern:D -\tex_nulldelimiterspace:D
+              \tex_left:D .
+              \box_use:N \l_tmpa_box
+              \tex_right:D ####1
+            }
+          } { ####1 }
+      }
+    }
+  }
+  \NewDocumentCommand { #1 } { s }
+  {
+    \IfBooleanTF { ##1 }
+    { \use:c { __manalysis_ \cs_to_str:N #1 _star } }
+    { \use:c { __manalysis_ \cs_to_str:N #1 _no_star } }
+  }
+}
+

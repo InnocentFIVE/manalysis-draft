@@ -1,0 +1,19 @@
+\ProvidesExplFile
+{manalysis-rfrac.sty} {2025/07/03} {0.1}
+{A~module~for~regex~powered~frac~command}
+
+\regex_set:Nn \l__manalysis_A_regex { [\|\(\[\{\c{l[floor|angle|ceil]}\c{<|>|\|}][^\|\)\]\}\c{r[floor|angle|ceil<|>|\|]}]*[\)\]\}\c{r[floor|angle|ceil]}\c{<|>|\|}] }
+\regex_set:Nn \l__manalysis_B_regex { ^.$ | ^[^+\-]*$ | ^[+\-][^+\-]*$ | ^\c{[A-Za-z]*}?[\^\_]?(\c{[A-Za-z]*}|\d|\{.*\})?$ }
+
+
+\cs_new:Npn \__manalysis_regex:n #1 {
+  \tl_set:Nn \l_tmpa_tl { #1 }
+  \tl_regex_replace_all:NNn \l_tmpa_tl \l__manalysis_A_regex { }
+  \exp_args:Nne \regex_match:NnTF \l__manalysis_B_regex { \tl_use:N \l_tmpa_tl }
+  { \mathord { #1 } } { ( #1 ) }
+}
+
+
+\DeclareDocumentCommand { \rfrac } { mm } {
+  { \__manalysis_regex:n { #1 } } / { \__manalysis_regex:n { #2 } }
+}

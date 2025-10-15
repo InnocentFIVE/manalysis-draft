@@ -1,0 +1,110 @@
+
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesExplPackage
+{manalysis} {2025/06/13} {0.1}
+{A package for mathematical analysis writing}
+
+\box_new:N \l__manalysis_tmpa_box
+\box_new:N \l__manalysis_tmpb_box
+\clist_new:N \l__manalysis_tmpa_clist
+\clist_new:N \l__manalysis_tmpb_clist
+\tl_new:N \l__manalysis_tmpa_tl
+\tl_new:N \g__manalysis_delimiter_relax
+\tl_new:N \g__manalysis_accent_relax
+\fp_new:N \l__manalysis_tmpa_fp
+\fp_new:N \l__manalysis_tmpb_fp
+\dim_new:N \l__manalysis_tmpa_dim
+\dim_new:N \l__manalysis_tmpb_dim
+\dim_new:N \g__manalysis_tmpb_dim
+
+\msg_new:nnn {manlaysis} {unknown-module}
+{ Module~`#1'~not~found }
+
+\msg_new:nnn {manlaysis} {version-toolow}
+{ Module~`#1'~is~too~old }
+
+\cs_new:Nn \__manalysis_lua_extension: {
+  \sys_if_engine_luatex:TF { -lua } { }
+}
+
+\sys_if_engine_luatex:TF {
+  \cs_new:Nn \__manalysis_mathchoice:nnnn {
+    \if_case:w \tex_mathstyle:D
+    #1
+    \or: #1
+    \or: #2
+    \or: #2
+    \or: #3
+    \or: #3
+    \or: #4
+    \or: #4
+    \else:
+    \fi:
+  }
+} {
+  \cs_set_eq:NN \__manalysis_mathchoice:nnnn \tex_mathchoice:D
+}
+
+\cs_set:Nn \__manalysis_mathpalette:nn {
+  \__manalysis_mathchoice:nnnn
+  { #1 { \tex_displaystyle:D } { #2 } }
+  { #1 { \tex_textstyle:D } { #2 } }
+  { #1 { \tex_scriptstyle:D } { #2 } }
+  { #1 { \tex_scriptscriptstyle:D } { #2 } }
+}
+
+\cs_new:Nn \manlaysis_module_load_if_unloaded:n {
+  \file_if_exist:nTF { manalysis-#1\__manalysis_lua_extension:.\@pkgextension } {
+    \manlaysis_module_load:n { #1\__manalysis_lua_extension: }
+  } {
+    \manlaysis_module_load:n { #1 }
+  }
+}
+
+\cs_new:Nn \manlaysis_module_load:n {
+  \IfFileLoadedTF { manalysis-#1.\@pkgextension }
+  { \msg_warning:nnn { manlaysis } { duplicate-loading } { #1 } }
+  {
+    \makeatletter
+    \file_input:n { manalysis-#1.\@pkgextension }
+    \ExplSyntaxOff
+    \makeatother
+  }
+}
+
+\cs_new_protected:Npn \manlaysis_module_load:nn #1#2 {
+  \str_if_eq:nnTF { #1 } { * } {
+    \manlaysis_module_load_if_unloaded:n { accent }
+    \manlaysis_module_load_if_unloaded:n { bigop }
+    \manlaysis_module_load_if_unloaded:n { paren }
+    \manlaysis_module_load_if_unloaded:n { pms }
+    \manlaysis_module_load_if_unloaded:n { rfrac }
+    \manlaysis_module_load_if_unloaded:n { stackcenter }
+    \manlaysis_module_load_if_unloaded:n { trifunc }
+  } {
+    \file_if_exist:nTF { manalysis-#1.\@pkgextension }
+    {
+      \manlaysis_module_load_if_unloaded:n { #1 }
+      \tl_if_blank:nTF { #2 } { } {
+        \IfFileAtLeastTF { manalysis-#1.\@pkgextension } { #2 }
+        { } {
+          \msg_error:nnn { manlaysis } { version-toolow } { #1 }
+        }
+      }
+    } { \msg_error:nnn { manlaysis } { unknown-module } { #1 } }
+  }
+}
+\@onlypreamble \manlaysis_module_load:nn
+
+\DeclareDocumentCommand { \UseManalysisModule } { mO{} } {
+  \clist_map_inline:nn { #1 } { \manlaysis_module_load:nn { ##1 } { #2 } }
+}
+
+\DeclareDocumentCommand { \ManalysisSetup } { m } {
+  \keys_set:nn { manalysis } { #1 }
+}
+
+%% 
+%%
+%% End of file `manalysis.sty'.
