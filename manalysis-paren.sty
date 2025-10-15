@@ -1,5 +1,5 @@
 \ProvidesExplFile {manalysis-paren.sty} {2025/07/03} {0.1}
-{Automatic~parenthesis~scaling}
+{Auxiliary~module~for~automatically~adjusting~the~height~of~parentheses~in~formulas}
 
 \sys_if_engine_luatex:TF {
 	\cs_new_eq:NN \__manalysis_delcode:N \tex_Udelcodenum:D
@@ -92,16 +92,6 @@
 	\hbox_set:Nn \l_tmpa_box { }
 	\box_set_ht:Nn \l_tmpa_box { \delimdim }
 	\box_use:N \l_tmpa_box
-}
-
-\AtBeginDocument {
-	\IfPackageLoadedTF { unicode-math } {
-		\cs_set:Nn \__manalysis_unicode_math_Vert_fix:Nnn {
-			\tl_if_eq:nnTF { #1 } { \| } { #2 } { #3 }
-		}
-	} {
-		\cs_set_eq:NN \__manalysis_unicode_math_Vert_fix:Nnn \use_iii:nnn
-	}
 }
 
 \cs_new:Nn \__manalysis_if_math_delimiter:NTF {

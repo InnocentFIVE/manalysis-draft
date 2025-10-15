@@ -1,6 +1,6 @@
 \ProvidesExplFile
 {stackcenter.sty} {2025/07/03} {0.1}
-{A~module~for~a~command}
+{Auxiliary~module~for~centering~one~symbol~over~another}
 
 
 \cs_set:Nn \__manalysis_stack_center_fbox:nn {
@@ -31,7 +31,6 @@
 	\box_set_dp:Nn \l_tmpb_box { \box_dp:N \l_tmpb_box - \fboxrule }
 	\box_set_wd:Nn \l_tmpb_box { 0pt }
 	\box_use:N \l_tmpb_box
-	% \box_use:N \l_tmpa_box
 }
 
 \cs_set:Nn \__manalysis_stack_center:nnn

@@ -1,6 +1,6 @@
 \ProvidesExplFile
 {manalysis-paren-lua.sty} {2025/07/03} {0.1}
-{A~module~for~regex~powered~frac~command}
+{Auxiliary~module~for~automatically~adjusting~the~height~of~parentheses~in~formulas}
 
 \RequirePackage{mathtools}
 
@@ -97,13 +97,13 @@
         \tex_mathopen:D {
           \__manalysis_paren_set_fuzzy:
           \__manalysis_if_math_delimiter:NTF ####1 {
-              \tex_mathopen:D {
-                \tex_left:D ####1
-                \box_use:N \l_tmpa_box
-                \tex_right:D .
-                \tex_kern:D -\tex_nulldelimiterspace:D
-              }
-            } { ####1 }
+            \tex_mathopen:D {
+              \tex_left:D ####1
+              \box_use:N \l_tmpa_box
+              \tex_right:D .
+              \tex_kern:D -\tex_nulldelimiterspace:D
+            }
+          } { ####1 }
         }
       }
       \cs_set:Npn #3 { ##2 #4 ##2 \tex_mathopen:D { } }
@@ -114,13 +114,13 @@
         \tex_mathclose:D {
           \__manalysis_paren_set_fuzzy:
           \__manalysis_if_math_delimiter:NTF ####1 {
-              \tex_mathclose:D {
-                \tex_kern:D -\tex_nulldelimiterspace:D
-                \tex_left:D .
-                \box_use:N \l_tmpa_box
-                \tex_right:D ####1
-              }
-            } { ####1 }
+            \tex_mathclose:D {
+              \tex_kern:D -\tex_nulldelimiterspace:D
+              \tex_left:D .
+              \box_use:N \l_tmpa_box
+              \tex_right:D ####1
+            }
+          } { ####1 }
         }
       }
     } {
@@ -138,7 +138,6 @@
             { \dim_to_decimal:n { \delimdim - \box_ht:N \l__manalysis_tmpa_box }~pt } { \dim_to_decimal:n { \l__manalysis_tmpa_dim }~pt }
           }
         }
-      % \tex_mathopen:D ##1 #5
       \tl_map_inline:nn { #5 } {
         \tex_mathopen:D {
           \__manalysis_paren_set_fuzzy:
@@ -147,7 +146,6 @@
       }
       \cs_set:Npn #3 { ##2 #4 ##2 \tex_mathopen:D { } }
       ##2 ##3 ##2
-      % \tex_mathclose:D ##1 #6
       \tl_map_inline:nn { #6 } {
         \tex_mathopen:D {
           \__manalysis_paren_set_fuzzy:
@@ -190,19 +188,17 @@
     \dim_set:Nn \delimdim { \l__manalysis_tmpa_dim + \box_ht:N \l__manalysis_tmpa_box }
     \box_set_ht:Nn \l_tmpa_box { \delimdim }
     \cs_set:Npn #3 { ##1 #4 ##1 \tex_mathopen:D { } }
-    % \tex_mathopen:D { }
-    %  \tex_left:D #5
     \tl_map_inline:nn { #5 } {
       \tex_mathopen:D {
         \__manalysis_paren_set_fuzzy:
         \__manalysis_if_math_delimiter:NTF ####1 {
-            \tex_mathopen:D {
-              \tex_left:D ####1
-              \box_use:N \l_tmpa_box
-              \tex_right:D .
-              \tex_kern:D -\tex_nulldelimiterspace:D
-            }
-          } { ####1 }
+          \tex_mathopen:D {
+            \tex_left:D ####1
+            \box_use:N \l_tmpa_box
+            \tex_right:D .
+            \tex_kern:D -\tex_nulldelimiterspace:D
+          }
+        } { ####1 }
       }
     }
     \tl_if_in:nnTF { ##2 } { #3 }
@@ -212,13 +208,13 @@
       \tex_mathclose:D {
         \__manalysis_paren_set_fuzzy:
         \__manalysis_if_math_delimiter:NTF ####1 {
-            \tex_mathclose:D {
-              \tex_kern:D -\tex_nulldelimiterspace:D
-              \tex_left:D .
-              \box_use:N \l_tmpa_box
-              \tex_right:D ####1
-            }
-          } { ####1 }
+          \tex_mathclose:D {
+            \tex_kern:D -\tex_nulldelimiterspace:D
+            \tex_left:D .
+            \box_use:N \l_tmpa_box
+            \tex_right:D ####1
+          }
+        } { ####1 }
       }
     }
   }
@@ -262,13 +258,13 @@
         \__manalysis_paren_set_fuzzy:
         \tl_map_inline:nn { #2 } {
           \__manalysis_if_math_delimiter:NTF ####1 {
-              \tex_mathopen:D {
-                \tex_left:D ####1
-                \box_use:N \l_tmpa_box
-                \tex_right:D .
-                \tex_kern:D -\tex_nulldelimiterspace:D
-              }
-            } { ####1 }
+            \tex_mathopen:D {
+              \tex_left:D ####1
+              \box_use:N \l_tmpa_box
+              \tex_right:D .
+              \tex_kern:D -\tex_nulldelimiterspace:D
+            }
+          } { ####1 }
         }
       }
       \box_use:N \l_tmpb_box
@@ -276,13 +272,13 @@
         \__manalysis_paren_set_fuzzy:
         \tl_map_inline:nn { #3 } {
           \__manalysis_if_math_delimiter:NTF ####1 {
-              \tex_mathclose:D {
-                \tex_kern:D -\tex_nulldelimiterspace:D
-                \tex_left:D .
-                \box_use:N \l_tmpa_box
-                \tex_right:D ####1
-              }
-            } { ####1 }
+            \tex_mathclose:D {
+              \tex_kern:D -\tex_nulldelimiterspace:D
+              \tex_left:D .
+              \box_use:N \l_tmpa_box
+              \tex_right:D ####1
+            }
+          } { ####1 }
         }
       }
     } {
@@ -290,8 +286,8 @@
         \__manalysis_paren_set_fuzzy:
         \tl_map_inline:nn { #2 } {
           \__manalysis_if_math_delimiter:NTF ####1 {
-              \tex_mathopen:D ##1 ####1
-            } { ####1 }
+            \tex_mathopen:D ##1 ####1
+          } { ####1 }
         }
       }
       \box_use:N \l_tmpb_box
@@ -299,8 +295,8 @@
         \__manalysis_paren_set_fuzzy:
         \tl_map_inline:nn { #3 } {
           \__manalysis_if_math_delimiter:NTF ####1 {
-              \tex_mathclose:D ##1 ####1
-            } { ####1 }
+            \tex_mathclose:D ##1 ####1
+          } { ####1 }
         }
       }
     }
@@ -335,12 +331,12 @@
       \__manalysis_paren_set_fuzzy:
       \tl_map_inline:nn { #2 } {
         \__manalysis_if_math_delimiter:NTF ####1 {
-            \tex_mathopen:D {
-              \tex_left:D ####1
-              \box_use:N \l_tmpa_box
-              \tex_right:D . \tex_kern:D -\tex_nulldelimiterspace:D
-            }
-          } { ####1 }
+          \tex_mathopen:D {
+            \tex_left:D ####1
+            \box_use:N \l_tmpa_box
+            \tex_right:D . \tex_kern:D -\tex_nulldelimiterspace:D
+          }
+        } { ####1 }
       }
     }
     \box_use:N \l_tmpb_box
@@ -348,13 +344,13 @@
       \__manalysis_paren_set_fuzzy:
       \tl_map_inline:nn { #3 } {
         \__manalysis_if_math_delimiter:NTF ####1 {
-            \tex_mathclose:D {
-              \tex_kern:D -\tex_nulldelimiterspace:D
-              \tex_left:D .
-              \box_use:N \l_tmpa_box
-              \tex_right:D ####1
-            }
-          } { ####1 }
+          \tex_mathclose:D {
+            \tex_kern:D -\tex_nulldelimiterspace:D
+            \tex_left:D .
+            \box_use:N \l_tmpa_box
+            \tex_right:D ####1
+          }
+        } { ####1 }
       }
     }
   }

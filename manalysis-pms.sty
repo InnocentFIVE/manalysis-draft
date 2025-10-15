@@ -1,15 +1,12 @@
 \ProvidesExplFile
 {manalysis-pms.sty} {2025/07/03} {0.1}
-{A~module~for~regex~powered~frac~command}
+{Auxiliary~module~providing~poor~man's~slanted~shapes~using~l3draw~or~TikZ}
 
 \RequirePackage{tikz}
 \RequirePackage{l3draw}
 
 \bool_new:N \g__manalysis_pms_tikz_bool
 \bool_new:N \l__manalysis_pms_math
-% \bool_set_true:N \g__manalysis_pms_tikz_bool
-
-
 
 \cs_new:Nn \__manalysis_pm_slant:nn {
 	\bool_if:nTF \g__manalysis_pms_tikz_bool {

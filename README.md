@@ -8,7 +8,7 @@ This package was originally designed to auto-resize parentheses in math mode, bu
 
 The user is recommended to use TeX Live version 2024 or newer. All testing by the author was conducted on an Arch Linux distribution with the `texlive-basic` package version 2025.2-2. No testing has been performed on MacOS.
 
-This package is highly experimental.
+This package is *highly experimental*.
 
 ## Usage
 
@@ -34,7 +34,8 @@ The latter command will load all modules.
 | `manalysis-accent.sty`      | Auxiliary module for automatically adjusting the width of accents in formulas           |
 | `manalysis-bigop.sty`       | Auxiliary module for converting arbitrary mathematical expressions into large operators |
 | `manalysis-paren.sty`       | Auxiliary module for automatically adjusting the height of parentheses in formulas      |
-| `manalysis-pms.sty`         | Auxiliary module providing rough shapes using `l3draw` or TikZ                          |
-| `manalysis-rfrac.sty`       | Auxiliary module providing a simple horizontal fraction command based on table syntax   |
+| `manalysis-paren-lua.sty`   | `paren` module for LuaTeX                                                               |
+| `manalysis-pms.sty`         | Auxiliary module providing poor man's slanted shapes using `l3draw` or TikZ             |
+| `manalysis-rfrac.sty`       | Auxiliary module providing a simple horizontal fraction command based on regex          |
 | `manalysis-stackcenter.sty` | Auxiliary module for centering one symbol over another                                  |
 | `manalysis-trifunc.sty`     | Auxiliary module for generating trigonometric functions like $\mathrm e^{\mathrm ix}$   |
