@@ -1,2 +1,2 @@
 # manalysis-draft
-A draft version of manalysis LaTeX package.
+A draft version of `manalysis` LaTeX package.
