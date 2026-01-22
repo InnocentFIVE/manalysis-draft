@@ -3,7 +3,7 @@
 
 \ProvidesExplPackage
 {manalysis} {2025/06/13} {0.1}
-{A~package~for~mathematical~analysis~writing}
+{A package for mathematical analysis writing}
 
 \box_new:N \l__manalysis_tmpa_box
 \box_new:N \l__manalysis_tmpb_box
@@ -18,15 +18,11 @@
 \dim_new:N \l__manalysis_tmpb_dim
 \dim_new:N \g__manalysis_tmpb_dim
 
-\msg_new:nnn {manlaysis} {unknown-module}
+\msg_new:nnn {manalaysis} {unknown-module}
 { Module~`#1'~not~found }
 
-\msg_new:nnn {manlaysis} {version-toolow}
+\msg_new:nnn {manalaysis} {version-toolow}
 { Module~`#1'~is~too~old }
-
-\cs_new:Nn \__manalysis_lua_extension: {
-  \sys_if_engine_luatex:TF { -lua } { }
-}
 
 \sys_if_engine_luatex:TF {
   \cs_new:Nn \__manalysis_mathchoice:nnnn {
@@ -54,56 +50,96 @@
   { #1 { \tex_scriptscriptstyle:D } { #2 } }
 }
 
-\cs_new:Nn \manlaysis_module_load_if_unloaded:n {
-  \file_if_exist:nTF { manalysis-#1\__manalysis_lua_extension:.\@pkgextension } {
-    \manlaysis_module_load:n { #1\__manalysis_lua_extension: }
+\cs_set:Nn \__manalysis_mathpalette:nnn {
+  \__manalysis_mathchoice:nnnn
+  { #1 { \tex_displaystyle:D } { #2 } { #3 } }
+  { #1 { \tex_textstyle:D } { #2 } { #3 } }
+  { #1 { \tex_scriptstyle:D } { #2 } { #3 } }
+  { #1 { \tex_scriptscriptstyle:D } { #2 } { #3 } }
+}
+
+\cs_set:Nn \__manalysis_mathpalette:nnnnnn {
+  \__manalysis_mathchoice:nnnn
+  { #1 { \tex_displaystyle:D } { #2 } { #3 } { #4 } { #5 } { #6 } }
+  { #1 { \tex_textstyle:D } { #2 } { #3 } { #4 } { #5 } { #6 } }
+  { #1 { \tex_scriptstyle:D } { #2 } { #3 } { #4 } { #5 } { #6 } }
+  { #1 { \tex_scriptscriptstyle:D } { #2 } { #3 } { #4 } { #5 } { #6 } }
+}
+
+
+\cs_new:Nn \manalaysis_module_load_if_unloaded:n {
+  \file_if_exist:nTF { manalysis-#1.\@pkgextension } {
+    \manalaysis_module_load:n { #1 }
   } {
-    \manlaysis_module_load:n { #1 }
+    \manalaysis_module_load:n { #1 }
   }
 }
 
-\cs_new:Nn \manlaysis_module_load:n {
+\cs_new:Nn \manalaysis_module_load:n {
   \IfFileLoadedTF { manalysis-#1.\@pkgextension }
-  { \msg_warning:nnn { manlaysis } { duplicate-loading } { #1 } }
+  { \msg_warning:nnn { manalaysis } { duplicate-loading } { #1 } }
   {
     \makeatletter
-    \file_input:n { manalysis-#1.\@pkgextension }
+    \ExplSyntaxOn
+    \input { manalysis-#1.\@pkgextension }
     \ExplSyntaxOff
     \makeatother
   }
 }
 
-\cs_new_protected:Npn \manlaysis_module_load:nn #1#2 {
+\cs_new_protected:Npn \manalaysis_module_load:nn #1#2 {
   \str_if_eq:nnTF { #1 } { * } {
-    \manlaysis_module_load_if_unloaded:n { accent }
-    \manlaysis_module_load_if_unloaded:n { bigop }
-    \manlaysis_module_load_if_unloaded:n { paren }
-    \manlaysis_module_load_if_unloaded:n { pms }
-    \manlaysis_module_load_if_unloaded:n { rfrac }
-    \manlaysis_module_load_if_unloaded:n { stackcenter }
-    \manlaysis_module_load_if_unloaded:n { trifunc }
+    \manalaysis_module_load_if_unloaded:n { accent }
+    \manalaysis_module_load_if_unloaded:n { bigop }
+    \manalaysis_module_load_if_unloaded:n { paren }
+    \manalaysis_module_load_if_unloaded:n { pms }
+    \manalaysis_module_load_if_unloaded:n { rfrac }
+    \manalaysis_module_load_if_unloaded:n { stackcenter }
+    \manalaysis_module_load_if_unloaded:n { trifunc }
   } {
     \file_if_exist:nTF { manalysis-#1.\@pkgextension }
     {
-      \manlaysis_module_load_if_unloaded:n { #1 }
+      \manalaysis_module_load_if_unloaded:n { #1 }
       \tl_if_blank:nTF { #2 } { } {
         \IfFileAtLeastTF { manalysis-#1.\@pkgextension } { #2 }
         { } {
-          \msg_error:nnn { manlaysis } { version-toolow } { #1 }
+          \msg_error:nnn { manalaysis } { version-toolow } { #1 }
         }
       }
-    } { \msg_error:nnn { manlaysis } { unknown-module } { #1 } }
+    } { \msg_error:nnn { manalaysis } { unknown-module } { #1 } }
   }
 }
-\@onlypreamble \manlaysis_module_load:nn
+\@onlypreamble \manalaysis_module_load:nn
 
 \DeclareDocumentCommand { \UseManalysisModule } { mO{} } {
-  \clist_map_inline:nn { #1 } { \manlaysis_module_load:nn { ##1 } { #2 } }
+  \clist_map_inline:nn { #1 } { \manalaysis_module_load:nn { ##1 } { #2 } }
 }
 
 \DeclareDocumentCommand { \ManalysisSetup } { m } {
   \keys_set:nn { manalysis } { #1 }
 }
+
+%% DeclareSet Command
+% \input{declareset.sty}
+
+
+%% Fourier Transform
+% \input{fourier.sty}
+
+
+%% Others Marcos
+% \input{fakeslant.sty}
+% \input{avoperator.sty}
+% \input{trianglefunc.sty}
+% \input{alphabet.sty}
+% \input{bigoperator.sty}
+% \input{stackcenter.sty}
+% \input{regexfrac.sty}
+
+
+
+
+
 
 %% 
 %%

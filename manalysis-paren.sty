@@ -1,271 +1,346 @@
 \ProvidesExplFile {manalysis-paren.sty} {2025/07/03} {0.1}
-{Auxiliary~module~for~automatically~adjusting~the~height~of~parentheses~in~formulas}
+{Automatic~parenthesis~scaling}
 
-\sys_if_engine_luatex:TF {
-	\cs_new_eq:NN \__manalysis_delcode:N \tex_Udelcodenum:D
+
+\sys_if_engine_opentype:TF {
+  \cs_new_eq:NN \__manalysis_delcode: \tex_Udelcodenum:D
 } {
-	\sys_if_engine_xetex:TF {
-		\cs_new_eq:NN \__manalysis_delcode:N \tex_Udelcodenum:D
-	} {
-		\cs_new_eq:NN \__manalysis_delcode:N \tex_delcode:D
-	}
+  \cs_new_eq:NN \__manalysis_delcode: \tex_delcode:D
 }
 
-\dim_new:N \l__manalysis_f_size_dim
 \dim_new:N \delimdim
-\bool_new:N \g__declare_set_fuzzy_bool
-\bool_set_true:N \g__declare_set_fuzzy_bool
-\tl_new:N \g__manalysis__delimiter_relax
+\bool_new:N \g__manalysis_paren_fuzzy_bool
+\bool_set_true:N \g__manalysis_paren_fuzzy_bool
+\tl_new:N \g__manalysis_paren_delimiter_in_set_relax
+\str_new:N \l__manalysis_paren_tmpa_str
+
 
 \keys_define:nn { manalysis / paren } {
-	compress-ht .cs_set:Np  = \__manalysis_compress_ht_of_norm:n #1,
-	fuzzy   		.bool_set:N = \g__declare_set_fuzzy_bool
+  compress-ht .cs_set:Np  = \__manalysis_compress_ht_of_norm:n #1,
+  fuzzy   		.bool_set:N = \g__manalysis_paren_fuzzy_bool
 }
 
-\msg_new:nnn { manlaysis } { uncompress-ht }
+\msg_new:nnn { manalaysis } { uncompress-height }
 { `compress-ht'~of~#2~(#1)~is~larger~than~#2. }
 
 \cs_set:Nn \__manalysis_compress_ht_of_norm:n {
-	\dim_max:nn {
-		\dim_min:nn {
-			0.3 #1 + 0.4 em
-		} {
-			0.8 #1
-		}
-	} { #1 - 0.8 em }
+  \dim_max:nn {
+    \dim_min:nn {
+      0.3 #1 + 0.4 em
+    } {
+      0.8 #1
+    }
+  } { #1 - 0.8 em }
 }
 
 \cs_set:Nn \__manalysis_delimiter:Nnnnn {
-	\hbox_set:Nn \l_tmpa_box { $ #4 \vcenter{} $ }
-	\hbox_set:Nn \l_tmpb_box {
-		\__manalysis_paren_set_fuzzy:
-		$ #4#5 $ }
-	\dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
-	\dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
-	\dim_set:Nn \l__manalysis_tmpa_dim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l_tmpa_box } { \l_tmpb_dim + \box_ht:N \l_tmpa_box } }
-	\dim_set:Nn \delimdim { #1 { \l__manalysis_tmpa_dim } + \box_ht:N \l_tmpa_box }
-	\cs_set_eq:NN \mstyle #4
-	#2 #3 #2
+  \hbox_set:Nn \l_tmpa_box { $ #4 \vcenter{} $ }
+  \hbox_set:Nn \l_tmpb_box {
+    \__manalysis_paren_set_fuzzy:
+    $ #4#5 $ }
+  \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+  \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+  \dim_set:Nn \l__manalysis_tmpa_dim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l_tmpa_box } { \l_tmpb_dim + \box_ht:N \l_tmpa_box } }
+  \dim_set:Nn \delimdim { #1 { \l__manalysis_tmpa_dim } + \box_ht:N \l_tmpa_box }
+  \cs_set_eq:NN \mstyle #4
+  #2 #3 #2
 }
 
-\cs_new:Nn \__manalysis_relax:N { \cs_set_eq:NN #1 \use:n }
-\cs_new:Nn \____manalysis_relax:N { \cs_set_eq:NN #1 \tex_relax:D }
+\cs_new:Nn \__manalysis_relax:N { \cs_set:Npn #1 ##1 { { ##1 } } }
+\cs_new:Nn \__manalysis_relax_aux:N {
+  \token_if_eq_catcode:NNT #1 \scan_stop: { \cs_set_eq:NN #1 \use:n }
+}
 
 \cs_new:Npn \__manalysis_paren_set_fuzzy: {
-	\tl_map_function:NN \g__manalysis__delimiter_relax \____manalysis_relax:N
-	\bool_if:NTF \g__declare_set_fuzzy_bool {
-		\tl_map_function:NN \g__manalysis_delimiter_relax \__manalysis_relax:N
-		\tl_map_function:NN \g__manalysis_accent_relax \__manalysis_relax:N
-	} { }
-	\cs_if_exist:NT \__manalysis_bigop_fuzzy_star:nnnnn
-	{
-		\cs_set_eq:NN \__manalysis_big_operator_star:nnnnn \__manalysis_bigop_fuzzy_star:nnnnn
-		\cs_set_eq:NN \__manalysis_bigop_mathpalette_no_star:nnnn \use_iii:nnnn
-	}
+  \tl_map_function:NN \g__manalysis_paren_delimiter_in_set_relax \__manalysis_relax_aux:N
+  \bool_if:NTF \g__manalysis_paren_fuzzy_bool {
+    \tl_map_function:NN \g__manalysis_delimiter_relax \__manalysis_relax:N
+    \tl_map_function:NN \g__manalysis_accent_relax \__manalysis_relax:N
+  } { }
+  \cs_if_exist:NT \__manalysis_bigop_fuzzy_star:nnnnn
+  {
+    \cs_set_eq:NN \__manalysis_big_operator_star:nnnnn \__manalysis_bigop_fuzzy_star:nnnnn
+    \cs_set_eq:NN \__manalysis_bigop_mathpalette_no_star:nnnn \use_iii:nnnn
+  }
 }
 
 \cs_set:Nn \__manalysis_ctrl_of_norm_height:nn {
-	\hbox_set:Nn \l_tmpa_box { $ #1 \vcenter{} $ }
-	\hbox_set:Nn \l_tmpb_box { $ #1#2 $ }
-	\dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
-	\dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
-	\dim_set:Nn \l__manalysis_tmpa_dim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l_tmpa_box } { \l_tmpb_dim + \box_ht:N \l_tmpa_box } }
-	\dim_set:Nn \delimdim { \__manalysis_compress_ht_of_norm:n { \l__manalysis_tmpa_dim } + \box_ht:N \l_tmpa_box }
-	\dim_compare:nNnT \delimdim > { \l__manalysis_tmpa_dim + \box_ht:N \l_tmpa_box } {
-			\tex_expanded:D {
-				\exp_not:N \msg_warning:nnnn { manlaysis } { uncompress-ht }
-				{ \dim_to_decimal:n { \delimdim - \box_ht:N \l_tmpa_box }~pt } { \dim_to_decimal:n { \l__manalysis_tmpa_dim }~pt }
-			}
-		}
-	\hbox_set:Nn \l_tmpa_box { }
-	\box_set_ht:Nn \l_tmpa_box { \delimdim }
-	\box_use:N \l_tmpa_box
+  \hbox_set:Nn \l_tmpa_box { $ #1 \vcenter{} $ }
+  \hbox_set:Nn \l_tmpb_box { $ #1#2 $ }
+  \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+  \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+  \dim_set:Nn \l__manalysis_tmpa_dim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l_tmpa_box } { \l_tmpb_dim + \box_ht:N \l_tmpa_box } }
+  \dim_set:Nn \delimdim { \__manalysis_compress_ht_of_norm:n { \l__manalysis_tmpa_dim } + \box_ht:N \l_tmpa_box }
+  \dim_compare:nNnT \delimdim > { \l__manalysis_tmpa_dim + \box_ht:N \l_tmpa_box } {
+      \tex_expanded:D {
+        \exp_not:N \msg_warning:nnnn { manalaysis } { uncompress-height }
+        { \dim_to_decimal:n { \delimdim - \box_ht:N \l_tmpa_box }~pt } { \dim_to_decimal:n { \l__manalysis_tmpa_dim }~pt }
+      }
+    }
+  \hbox_set:Nn \l_tmpa_box { }
+  \box_set_ht:Nn \l_tmpa_box { \delimdim }
+  \box_use:N \l_tmpa_box
 }
 
 
 \cs_set:Nn \__manalysis_ctrl_of_norm_height_star:nn {
-	\hbox_set:Nn \l_tmpa_box { $ #1 \vcenter{} $ }
-	\hbox_set:Nn \l_tmpb_box { $ #1#2 $ }
-	\dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
-	\dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
-	\dim_set:Nn \delimdim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l_tmpa_box } { \l_tmpb_dim + \box_ht:N \l_tmpa_box } + \box_ht:N \l_tmpa_box }
-	\hbox_set:Nn \l_tmpa_box { }
-	\box_set_ht:Nn \l_tmpa_box { \delimdim }
-	\box_use:N \l_tmpa_box
+  \hbox_set:Nn \l_tmpa_box { $ #1 \vcenter{} $ }
+  \hbox_set:Nn \l_tmpb_box { $ #1#2 $ }
+  \dim_set:Nn \l_tmpa_dim { \box_ht:N \l_tmpb_box }
+  \dim_set:Nn \l_tmpb_dim { \box_dp:N \l_tmpb_box }
+  \dim_set:Nn \delimdim { \dim_max:nn { \l_tmpa_dim - \box_ht:N \l_tmpa_box } { \l_tmpb_dim + \box_ht:N \l_tmpa_box } + \box_ht:N \l_tmpa_box }
+  \hbox_set:Nn \l_tmpa_box { }
+  \box_set_ht:Nn \l_tmpa_box { \delimdim }
+  \box_use:N \l_tmpa_box
 }
 
-\cs_new:Nn \__manalysis_if_math_delimiter:NTF {
-	\exp_after:wN \cs_set:Npx \exp_after:wN \l_tmpa_tl \exp_after:wN { \exp_after:wN \exp:w \exp_after:wN \exp_end_continue_f:w \exp_after:wN \__text_token_to_explicit:N #1 }
-	\cs_set_nopar:Npx \l_tmpa_tl { \tl_head:N \l_tmpa_tl }
-	\if_catcode:w \l_tmpa_tl \scan_stop:
-	\exp_after:wN \token_if_eq_meaning:NNTF \l_tmpa_tl \tex_delimiter:D
-	{ #2 } {
-		\exp_after:wN \token_if_eq_meaning:NNTF \l_tmpa_tl \tex_Udelimiter:D
-		{ #2 } { #3 }
-	}
-	\else:
-	\int_compare:nNnTF { \__manalysis_delcode:N \exp_after:wN ` \l_tmpa_tl } > 0
-		{ #2 } { #3 }
-	\fi:
+% \AtBeginDocument {
+%   \IfPackageLoadedTF { unicode-math } {
+%     \cs_set:Nn \__manalysis_unicode_math_Vert_fix:Nnn {
+%       \tl_if_eq:nnTF { #1 } { \| } { #2 } { #3 }
+%     }
+%   } {
+%     \cs_set_eq:NN \__manalysis_unicode_math_Vert_fix:Nnn \use_iii:nnn
+%   }
+% }
+
+% \cs_new:Nn \__manalysis_if_math_delimiter:NTF {
+%   \exp_after:wN \cs_set:Npx \exp_after:wN \l__manalysis_tmpa_tl
+%   \exp_after:wN { \exp_after:wN \exp:w \exp_after:wN \exp_end_continue_f:w \exp_after:wN \__text_token_to_explicit:N #1 }
+%   \cs_set_nopar:Npx \l__manalysis_tmpa_tl { \tl_head:N \l__manalysis_tmpa_tl }
+%   \if_catcode:w \l__manalysis_tmpa_tl \scan_stop:
+%   \exp_after:wN \token_if_eq_meaning:NNTF \l__manalysis_tmpa_tl \tex_delimiter:D
+%   { #2 } {
+%     \exp_after:wN \token_if_eq_meaning:NNTF \l__manalysis_tmpa_tl \tex_Udelimiter:D
+%     { #2 } { #3 }
+%   }
+%   \else:
+%   \int_compare:nNnTF { \__manalysis_delcode: \exp_after:wN ` \l__manalysis_tmpa_tl } > 0
+%     { #2 } { #3 }
+%   \fi:
+% }
+
+
+%% from https://tex.stackexchange.com/questions/684273/how-to-know-if-a-token-is-a-maths-delimiter/752462#752462
+
+\cs_new_protected:Nn \__manalysis_if_math_delimiter:NTF
+{
+  \token_if_macro:NTF #1
+  {% #1 is a control sequence: check whether it is \delimiter or \Udelimiter
+    \bool_lazy_or:nnTF
+    { \token_if_eq_meaning_p:NN #1 \{ }
+    { \token_if_eq_meaning_p:NN #1 \} }
+    {% either \{ or \}
+      #2
+    }
+    {% a macro, but neither \{ nor \}
+      \tl_set:Ne \l__manalysis_tmpa_tl { \exp_args:No \tl_head:n { #1 } }
+      \exp_args:NV \token_if_primitive:NTF \l__manalysis_tmpa_tl
+      {% token is primitive
+        \exp_args:Nee \bool_lazy_or:nnTF
+        { \exp_args:NV \token_if_eq_meaning_p:NN \l__manalysis_tmpa_tl \delimiter }
+        { \exp_args:NV \token_if_eq_meaning_p:NN \l__manalysis_tmpa_tl \Udelimiter }
+        { #2 }
+        { #3 }
+      }
+      {% retry in case we have a protected macro; e.g. \| might give \Vert
+        \exp_after:wN
+        \int_compare:nNnTF \exp_after:wN {
+          \exp_after:wN
+          \tl_count:n
+          \exp_after:wN
+          { \exp:w \exp_after:wN \exp_end_continue_f:w \exp_after:wN \__text_token_to_explicit:N #1 }
+        } > { 1 } { #3 } {
+            \exp_args:Ne \__manalysis_if_math_delimiter:NTF \l__manalysis_tmpa_tl { #2 } { #3 }
+          }
+      }
+    }
+  } {% #1 is a character: check whether it has a nonzero \delcode
+    % However, it might also be an implicit character,
+    % so we need to access its meaning
+    \exp_args:Ne \int_compare:nTF
+    { \__manalysis_delcode: `\exp_args:Ne \str_item:nn { \token_to_meaning:N #1 } { -1 } > 0 }
+    { #2 } { #3 }
+  }
 }
+
+
 
 \cs_new:Nn \__manalysis_declare_set_aux:nnn {
-	\cs_new:cn { __manalysis_ \cs_to_str:N #1 _symbol:n } { #3 }
-	\cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #2 :ww } ##1 #2 ##2 #2 \q_stop {
-		\quark_if_nil:nTF { ##2 } {
-			\tex_mathord:D { ##1 }
-		} {
-			\use:c { __manalysis_ \cs_to_str:N #1 _skip }
-			\tex_mathord:D { ##1 }
-			\use:c { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #2 _ fn :ww }
-			\group_begin:
-			\cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { }
-			\use:c { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #2 :ww } ##2 #2 \q_stop
-			\group_end:
-			\use:c { __manalysis_ \cs_to_str:N #1 _skip }
-		}
-	}
-	\cs_set:cn { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #2 :n }
-	{ \use:c { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #2 :ww } ##1 #2 \q_nil #2 \q_stop }
+  \cs_set:cpn { __manalysis_extract_before_ #1 :ww } ##1 #2 ##2 #2 \q_stop {
+    \quark_if_nil:nTF { ##2 } {
+      \tex_mathord:D { ##1 }
+    } {
+      \use:c { __manalysis_ #1 _skip }
+      \tex_mathord:D { ##1 }
+      \use:c { __manalysis_extract_before_ #1 _ fn :ww }
+      \group_begin:
+      \cs_set:cpn { __manalysis_ #1 _skip } { }
+      \use:c { __manalysis_extract_before_ #1 :ww } ##2 #2 \q_stop
+      \group_end:
+      \use:c { __manalysis_ #1 _skip }
+    }
+  }
+  \exp_args:Nc \cs_set:Nn { __manalysis_extract_before_ #1 :n }
+  { \use:c { __manalysis_extract_before_ #1 :ww } ##1 #2 \q_nil #2 \q_stop }
 }
 
 \cs_new:Nn \__manalysis_declare_set_aux_open:Nnnn {
-	\tex_mathopen:D {
-		\cs_if_eq:NNF #2 \scan_stop: { \cs_set_eq:NN #2 \tex_relax:D }
-		\__manalysis_paren_set_fuzzy:
-		\tl_map_inline:nn { #3 } {
-			\__manalysis_if_math_delimiter:NTF ##1 {
-				\tex_mathopen:D {
-					\tex_left:D ##1
-					\__manalysis_mathpalette:nn { #1 } { #4 }
-					\tex_right:D .
-					\tex_kern:D -\tex_nulldelimiterspace:D
-				}
-			} { ##1 }
-		}
-	}
+  \tex_mathopen:D {
+    \tl_if_blank:nF { #2 } {
+      \token_if_eq_catcode:NNT #2 \scan_stop: {
+        \cs_if_eq:NNF #2 \scan_stop: { \cs_set_eq:NN #2 \tex_relax:D }
+      }
+    }
+    \__manalysis_paren_set_fuzzy:
+    \tl_map_inline:nn { #3 } {
+      \__manalysis_if_math_delimiter:NTF ##1 {
+        \tex_mathopen:D {
+          \tex_left:D ##1
+          \__manalysis_mathpalette:nn { #1 } { #4 }
+          \tex_right:D .
+          \tex_kern:D -\tex_nulldelimiterspace:D
+        }
+      } { ##1 }
+    }
+  }
 }
 
 \cs_new:Nn \__manalysis_declare_set_aux_close:Nnnn {
-	\tex_mathclose:D {
-		\cs_if_eq:NNF #2 \scan_stop: { \cs_set_eq:NN #2 \tex_relax:D }
-		\__manalysis_paren_set_fuzzy:
-		\tl_map_inline:nn { #3 } {
-			\__manalysis_if_math_delimiter:NTF ##1 {
-				\tex_mathclose:D {
-					\tex_kern:D -\tex_nulldelimiterspace:D
-					\tex_left:D .
-					\__manalysis_mathpalette:nn { #1 } { #4 }
-					\tex_right:D ##1
-				}
-			} { ##1 }
-		}
-	}
+  \tex_mathclose:D {
+    \tl_if_blank:nF { #2 } {
+      \token_if_eq_catcode:NNT #2 \scan_stop: {
+        \cs_if_eq:NNF #2 \scan_stop: { \cs_set_eq:NN #2 \tex_relax:D }
+      }
+    }
+    \__manalysis_paren_set_fuzzy:
+    \tl_map_inline:nn { #3 } {
+      \__manalysis_if_math_delimiter:NTF ##1 {
+        \tex_mathclose:D {
+          \tex_kern:D -\tex_nulldelimiterspace:D
+          \tex_left:D .
+          \__manalysis_mathpalette:nn { #1 } { #4 }
+          \tex_right:D ##1
+        }
+      } { ##1 }
+    }
+  }
 }
 
 \NewDocumentCommand { \DeclareSet } { mmmmmm } {
-	\__manalysis_declare_set_aux:nnn { #1 } { #3 } { #4 }
+  % \DeclareSet\set{\,}{\given}{;}{\lbrace}{\rbrace}
+  \str_set:Ne \l__manalysis_paren_tmpa_str { \cs_to_str:N #1 }
+  \tl_if_blank:nF { #3 } {
+    \exp_args:Ne \__manalysis_declare_set_aux:nnn { \str_use:N \l__manalysis_paren_tmpa_str } { #3 } { #4 }
+  }
 
-	\exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _no_star }
-	{ oom } {
-		\tex_mathopen:D { }
-		\IfNoValueTF{ ##2 }{
-			\cs_set:cpn { ____manalysis_ \cs_to_str:N #1 _skip } { }
-			\cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { #2 }
-		} {
-			\cs_set:cpn { ____manalysis_ \cs_to_str:N #1 _skip } { ##2 }
-			\cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { ##2 }
-		}
 
-		\IfNoValueTF { ##1 } {
-			\__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height:nn { #3 } { #5 } { ##3 }
-			\group_begin:
-			\cs_set_eq:NN #3 \tex_relax:D
-			\cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #3 _ fn :ww } {
-				\__manalysis_mathpalette:nn { \__manalysis_delimiter:Nnnnn \__manalysis_compress_ht_of_norm:n { #2 } { #4 } } { ##3 }
-				\tex_mathopen:D { }
-				\allowbreak
-			}
-			\use:c { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #3 :n } { ##3 }
-			\group_end:
-			\__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height:nn { #3 } { #6 } { ##3 }
-		} {
-			\hbox_set:Nn \l_tmpa_box { $ ##1| $ }
-			\tl_map_inline:nn { #5 } {
-				\__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
-			}
-			\group_begin:
-			\dim_set:Nn \delimdim { \box_ht:N \l_tmpa_box }
-			\cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #3 _ fn :ww } {
-				\IfNoValueTF { ##2 } { #2 #4 #2 } { ##2 #4 ##2 }
-				\tex_mathopen:D { }
-				\allowbreak
-			}
-			\use:c { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #3 :n } { ##3 }
-			\group_end:
-			\tl_map_inline:nn { #6 } {
-				\__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
-			}
-		}
-	}
+  \exp_args:Nc \NewDocumentCommand { __manalysis_ \l__manalysis_paren_tmpa_str _no_star }
+  { oom } {
+    \tex_mathopen:D { }
+    \IfNoValueTF{ ##2 }{
+      \cs_set:cpn { ____manalysis_ \cs_to_str:N #1 _skip } { }
+      \cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { #2 }
+    } {
+      \cs_set:cpn { ____manalysis_ \cs_to_str:N #1 _skip } { ##2 }
+      \cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { ##2 }
+    }
 
-	\exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _star }
-	{ O { #2 } m } {
-		\tex_mathopen:D { }
-		\cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { ##1 }
-		\__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { #3 } { #5 } { ##2 }
-		\group_begin:
-		\cs_set_eq:NN #3 \tex_relax:D
-		\cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #3 _ fn :ww } {
-			\__manalysis_mathpalette:nn { \__manalysis_delimiter:Nnnnn \use:n { ##1 } { #4 } } { ##2 }
-		}
-		\use:c { __manalysis_extract_before_ \cs_to_str:N #1 _ \cs_to_str:N #3 :n } { ##2 }
-		\group_end:
-		\__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { #3 } { #6 } { ##2 }
-	}
+    \IfNoValueTF { ##1 } {
+      \__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height:nn { #3 } { #5 } { ##3 }
+      \group_begin:
+      \token_if_eq_catcode:NNT #3 \scan_stop: {
+        \cs_set_eq:NN #3 \tex_relax:D
+      }
+      \cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ fn :ww } {
+        \__manalysis_mathpalette:nn { \__manalysis_delimiter:Nnnnn \__manalysis_compress_ht_of_norm:n { #2 } { #4 } } { ##3 }
+        \tex_mathopen:D { }
+        \allowbreak
+      }
+      \use:c { __manalysis_extract_before_ \cs_to_str:N #1 :n } { ##3 }
+      \group_end:
+      \__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height:nn { #3 } { #6 } { ##3 }
+    } {
+      \hbox_set:Nn \l_tmpa_box { $ ##1| $ }
+      \tl_map_inline:nn { #5 } {
+        \__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
+      }
+      \group_begin:
+      \dim_set:Nn \delimdim { \box_ht:N \l_tmpa_box }
+      \cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ fn : ww } {
+        \IfNoValueTF { ##2 } { #2 #4 #2 } { ##2 #4 ##2 }
+        \tex_mathopen:D { }
+        \allowbreak
+      }
+      \use:c { __manalysis_extract_before_ \cs_to_str:N #1 :n } { ##3 }
+      \group_end:
+      \tl_map_inline:nn { #6 } {
+        \__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
+      }
+    }
+  }
 
-	\NewDocumentCommand { #1 } { s } {
-		\IfBooleanTF { ##1 }
-		{ \use:c { __manalysis_ \cs_to_str:N #1 _star } }
-		{ \use:c { __manalysis_ \cs_to_str:N #1 _no_star } }
-	}
+  \exp_args:Nc \NewDocumentCommand { __manalysis_ \l__manalysis_paren_tmpa_str _star }
+  { O { #2 } m } {
+    \tex_mathopen:D { }
+    \cs_set:cpn { __manalysis_ \cs_to_str:N #1 _skip } { ##1 }
+    \__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { #3 } { #5 } { ##2 }
+    \group_begin:
+    \token_if_eq_catcode:NNT #3 \scan_stop: {
+      \cs_set_eq:NN #3 \tex_relax:D
+    }
+    \cs_set:cpn { __manalysis_extract_before_ \cs_to_str:N #1 _ fn :ww } {
+      \__manalysis_mathpalette:nn { \__manalysis_delimiter:Nnnnn \use:n { ##1 } { #4 } } { ##2 }
+    }
+    \use:c { __manalysis_extract_before_ \cs_to_str:N #1 :n } { ##2 }
+    \group_end:
+    \__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { #3 } { #6 } { ##2 }
+  }
 
-	\tl_put_right:Nn \g__manalysis_delimiter_relax { #1 }
-	\tl_put_right:Nn \g__manalysis__delimiter_relax { #3 }
+  \NewDocumentCommand { #1 } { s } {
+    \IfBooleanTF { ##1 }
+    { \use:c { __manalysis_ \cs_to_str:N #1 _star } }
+    { \use:c { __manalysis_ \cs_to_str:N #1 _no_star } }
+  }
+
+  \tl_put_right:Nn \g__manalysis_delimiter_relax { #1 }
+  \tl_put_right:Nn \g__manalysis_paren_delimiter_in_set_relax { #3 }
 }
 
 
 
 \NewDocumentCommand { \DeclareParen } { mmm } {
-	\exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _no_star }
-	{ om } {
-		\tex_mathopen:D { }
-		\IfNoValueTF{ ##1 }{
-			\__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height:nn { \scan_stop: } { #2 } { ##2 }
-			\tex_mathord:D { ##2 }
-			\__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height:nn { \scan_stop: } { #3 } { ##2 }
-		} {
-			\tl_map_inline:nn { #2 } {
-				\__manalysis_if_math_delimiter:NTF ####1 { \tex_mathopen:D ##1 ####1 } { ####1 }
-			}
-			\tex_mathord:D { ##2 }
-			\tl_map_inline:nn { #3 } {
-				\__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
-			}
-		}
-	}
-	\exp_args:Nc \NewDocumentCommand { __manalysis_ \cs_to_str:N #1 _star }
-	{ m } {
-		\tex_mathopen:D { }
-		\__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { \scan_stop: } { #2 } { ##1 }
-		\tex_mathord:D { ##1 }
-		\__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { \scan_stop: } { #3 } { ##1 }
-	}
-	\NewDocumentCommand { #1 } { s }
-	{
-		\IfBooleanTF { ##1 }
-		{ \use:c { __manalysis_ \cs_to_str:N #1 _star } }
-		{ \use:c { __manalysis_ \cs_to_str:N #1 _no_star } }
-	}
-	\tl_put_right:Nn \g__manalysis_delimiter_relax { #1 }
+	\DeclareSet { #1 } { } { } { } { #2 } { #3 }
+%   \str_set:Ne \l__manalysis_paren_tmpa_str { \cs_to_str:N #1 }
+%   \exp_args:Nc \NewDocumentCommand { __manalysis_ \l__manalysis_paren_tmpa_str _no_star }
+%   { om } {
+%     \tex_mathopen:D { }
+%     \IfNoValueTF{ ##1 } {
+%       \__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height:nn { \scan_stop: } { #2 } { ##2 }
+%       \tex_mathord:D { ##2 }
+%       \__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height:nn { \scan_stop: } { #3 } { ##2 }
+%     } {
+%       \tl_map_inline:nn { #2 } {
+%         \__manalysis_if_math_delimiter:NTF ####1 { \tex_mathopen:D ##1 ####1 } { ####1 }
+%       }
+%       \tex_mathord:D { ##2 }
+%       \tl_map_inline:nn { #3 } {
+%         \__manalysis_if_math_delimiter:NTF ####1 { \tex_mathclose:D ##1 ####1 } { ####1 }
+%       }
+%     }
+%   }
+%   \exp_args:Nc \NewDocumentCommand { __manalysis_ \l__manalysis_paren_tmpa_str _star }
+%   { m } {
+%     \tex_mathopen:D { }
+%     \__manalysis_declare_set_aux_open:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { \scan_stop: } { #2 } { ##1 }
+%     \tex_mathord:D { ##1 }
+%     \__manalysis_declare_set_aux_close:Nnnn \__manalysis_ctrl_of_norm_height_star:nn { \scan_stop: } { #3 } { ##1 }
+%   }
+%   \NewDocumentCommand { #1 } { s }
+%   {
+%     \IfBooleanTF { ##1 }
+%     { \use:c { __manalysis_ \cs_to_str:N #1 _star } }
+%     { \use:c { __manalysis_ \cs_to_str:N #1 _no_star } }
+%   }
+%   \tl_put_right:Nn \g__manalysis_delimiter_relax { #1 }
 }

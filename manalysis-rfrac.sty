@@ -1,6 +1,6 @@
 \ProvidesExplFile
 {manalysis-rfrac.sty} {2025/07/03} {0.1}
-{Auxiliary~module~providing~a~simple~horizontal~fraction~command~based~on~regex}
+{A~module~for~regex~powered~frac~command}
 
 \regex_set:Nn \l__manalysis_A_regex { [\|\(\[\{\c{l[floor|angle|ceil]}\c{<|>|\|}][^\|\)\]\}\c{r[floor|angle|ceil<|>|\|]}]*[\)\]\}\c{r[floor|angle|ceil]}\c{<|>|\|}] }
 \regex_set:Nn \l__manalysis_B_regex { ^.$ | ^[^+\-]*$ | ^[+\-][^+\-]*$ | ^\c{[A-Za-z]*}?[\^\_]?(\c{[A-Za-z]*}|\d|\{.*\})?$ }

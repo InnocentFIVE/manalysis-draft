@@ -1,0 +1,69 @@
+\ProvidesExplFile
+{alphabet.sty} {2025/07/03} {0.1}
+{Some macros about alphabets}
+
+\cs_new:Nn \__manalysis_define_letters:Nn {
+  \clist_map_inline:nn {#2} {
+    #1 { ##1 }
+  }
+}
+
+\cs_new:Nn \__manalysis_define_mathbb_letter:n {
+  \expandafter\let \csname #1#1\endcsname \relax
+  \cs_new:cpn {#1#1} {\mathbb{#1}}
+}
+
+\cs_new:Nn \__manalysis_define_mathbf_letter:n {
+  \expandafter\let \csname #1bf\endcsname \relax
+  \expandafter\let \csname bf#1\endcsname \relax
+  \cs_new:cpn {#1bf} {\mathbf{#1}}
+  \cs_new:cpn {bf#1} {\mathbf{#1}}
+}
+
+\cs_new:Nn \__manalysis_define_mathfrak_letter:n {
+  \expandafter\let \csname #1frak\endcsname \relax
+  \expandafter\let \csname frak#1\endcsname \relax
+  \cs_new:cpn {#1frak} {\mathfrak{#1}}
+  \cs_new:cpn {frak#1} {\mathfrak{#1}}
+}
+
+\cs_new:Nn \__manalysis_define_mathrm_letter:n {
+  \expandafter\let \csname #1rm\endcsname \relax
+  \expandafter\let \csname rm#1\endcsname \relax
+  \cs_new:cpn {#1rm} {\mathrm{#1}}
+  \cs_new:cpn {rm#1} {\mathrm{#1}}
+}
+
+\cs_new:Nn \__manalysis_define_mathcal_letter:n {
+  \expandafter\let \csname #1cal\endcsname \relax
+  \expandafter\let \csname cal#1\endcsname \relax
+  \cs_new:cpn {#1cal} {\mathcal{#1}}
+  \cs_new:cpn {cal#1} {\mathcal{#1}}
+}
+
+\cs_new:Nn \__manalysis_define_mathtt_letter:n {
+  \expandafter\let \csname #1tt\endcsname \relax
+  \expandafter\let \csname tt#1\endcsname \relax
+  \cs_new:cpn {#1tt} {\mathtt{#1}}
+  \cs_if_exist:cF { #1 tt } {
+    \cs_new:cpn {tt#1} {\mathtt{#1}}
+  }
+}
+
+\cs_if_exist:NTF \mathscr {
+  \cs_new:Nn \__manalysis_define_mathscr_letter:n {
+    \expandafter\let \csname #1scr\endcsname \relax
+    \expandafter\let \csname scr#1\endcsname \relax
+    \cs_new:cpn {#1scr} {\mathscr{#1}}
+    \cs_new:cpn {scr#1} {\mathscr{#1}}
+  }
+  \__manalysis_define_letters:Nn \__manalysis_define_mathscr_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z}
+} { }
+
+
+\__manalysis_define_letters:Nn \__manalysis_define_mathbb_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z}
+\__manalysis_define_letters:Nn \__manalysis_define_mathbf_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}
+\__manalysis_define_letters:Nn \__manalysis_define_mathfrak_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}
+\__manalysis_define_letters:Nn \__manalysis_define_mathrm_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}
+\__manalysis_define_letters:Nn \__manalysis_define_mathtt_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}
+\__manalysis_define_letters:Nn \__manalysis_define_mathcal_letter:n {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}

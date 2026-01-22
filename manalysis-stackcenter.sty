@@ -1,99 +1,98 @@
 \ProvidesExplFile
 {stackcenter.sty} {2025/07/03} {0.1}
-{Auxiliary~module~for~centering~one~symbol~over~another}
+{A~module~for~a~command}
 
 
 \cs_set:Nn \__manalysis_stack_center_fbox:nn {
-	\hbox_set:Nn \l_tmpa_box { $ #1#2 $ }
-	\dim_set:Nn \l_tmpa_dim { \box_dp:N \l_tmpa_box + \fboxrule }
-	\dim_set:Nn \l_tmpb_dim { \box_ht:N \l_tmpa_box + \box_dp:N \l_tmpa_box - 9\fboxrule }
-	\hbox_set:Nn \l_tmpb_box {
-		\box_move_down:nn { \l_tmpa_dim } {
-			\hbox:n {
-				\vbox:n {
-					\hrule \@height \fboxrule
-					\int_step_inline:nn { 10 } {
-						\hbox:n {
-							\rule{\fboxrule}{0.1\l_tmpb_dim}
-							\int_step_inline:nn { 10 } {
-								\skip_horizontal:n { \box_wd:N \l_tmpa_box / 10  - 11 \fboxrule / 10 }
-								\rule{\fboxrule}{0.1\l_tmpb_dim}
-							}
-						}
-						\hrule \@height \fboxrule
-					}
-				}
-			}
-		}
-		\tex_hss:D
-	}
-	\box_set_ht:Nn \l_tmpb_box { \box_ht:N \l_tmpb_box - \fboxrule }
-	\box_set_dp:Nn \l_tmpb_box { \box_dp:N \l_tmpb_box - \fboxrule }
-	\box_set_wd:Nn \l_tmpb_box { 0pt }
-	\box_use:N \l_tmpb_box
+  \hbox_set:Nn \l_tmpa_box { $ #1#2 $ }
+  \dim_set:Nn \l_tmpa_dim { \box_dp:N \l_tmpa_box + \fboxrule }
+  \dim_set:Nn \l_tmpb_dim { \box_ht:N \l_tmpa_box + \box_dp:N \l_tmpa_box - 9\fboxrule }
+  \hbox_set:Nn \l_tmpb_box {
+    \box_move_down:nn { \l_tmpa_dim } {
+      \hbox:n {
+        \vbox:n {
+          \hrule \@height \fboxrule
+          \int_step_inline:nn { 10 } {
+            \hbox:n {
+              \rule{\fboxrule}{0.1\l_tmpb_dim}
+              \int_step_inline:nn { 10 } {
+                \skip_horizontal:n { \box_wd:N \l_tmpa_box / 10  - 11 \fboxrule / 10 }
+                \rule{\fboxrule}{0.1\l_tmpb_dim}
+              }
+            }
+            \hrule \@height \fboxrule
+          }
+        }
+      }
+    }
+    \tex_hss:D
+  }
+  \box_set_ht:Nn \l_tmpb_box { \box_ht:N \l_tmpb_box - \fboxrule }
+  \box_set_dp:Nn \l_tmpb_box { \box_dp:N \l_tmpb_box - \fboxrule }
+  \box_set_wd:Nn \l_tmpb_box { 0pt }
+  \box_use:N \l_tmpb_box
+  % \box_use:N \l_tmpa_box
 }
 
 \cs_set:Nn \__manalysis_stack_center:nnn
 {
-	\hbox_set:Nn \l_tmpb_box { $#1$ }
-	\hbox_set:Nn \l__manalysis_tmpa_box { $#2$ }
-	\box_rotate:Nn \l__manalysis_tmpa_box { \clist_item:Nn \l_tmpa_clist { #3 } }
-	\box_scale:Nnn \l__manalysis_tmpa_box {
-		\clist_item:Nn \l__manalysis_tmpa_clist { #3 }
-	} { 1 }
-	\box_set_ht:Nn \l__manalysis_tmpa_box { 0 pt }
-	\box_set_dp:Nn \l__manalysis_tmpa_box { 0 pt }
-	\dim_set:Nn \l_tmpa_dim { ( \box_ht:N \l_tmpb_box + \box_dp:N \l_tmpb_box ) / 2 }
-	\hbox_set:Nn \l_tmpa_box {
-		\skip_horizontal:n {
-			\clist_item:Nn \l__manalysis_tmpb_clist { #3 }
-			\box_wd:N \l_tmpb_box }
-		\hbox_to_zero:n {
-			\tex_hss:D
-			\box_move_up:nn { \clist_item:Nn \l_tmpb_clist { #3 } \l_tmpa_dim }
-			{ \box_use:N \l__manalysis_tmpa_box }
-			\tex_hss:D
-		}
-	}
-	\box_set_wd:Nn \l_tmpa_box { 0 pt }
-	\box_use:N \l_tmpa_box
+  \hbox_set:Nn \l_tmpb_box { $#1$ }
+  \hbox_set:Nn \l__manalysis_tmpa_box { $#2$ }
+  \box_rotate:Nn \l__manalysis_tmpa_box { \clist_item:Nn \l_tmpa_clist { #3 } }
+  \box_scale:Nnn \l__manalysis_tmpa_box {
+    \clist_item:Nn \l__manalysis_tmpa_clist { #3 }
+  } { 1 }
+  \box_set_ht:Nn \l__manalysis_tmpa_box { 0 pt }
+  \box_set_dp:Nn \l__manalysis_tmpa_box { 0 pt }
+  \dim_set:Nn \l_tmpa_dim { ( \box_ht:N \l_tmpb_box + \box_dp:N \l_tmpb_box ) / 2 }
+  \hbox_set:Nn \l_tmpa_box {
+    \skip_horizontal:n {
+      \clist_item:Nn \l__manalysis_tmpb_clist { #3 }
+      \box_wd:N \l_tmpb_box }
+    \hbox_to_zero:n {
+      \tex_hss:D
+      \box_move_up:nn { \clist_item:Nn \l_tmpb_clist { #3 } \l_tmpa_dim }
+      { \box_use:N \l__manalysis_tmpa_box }
+      \tex_hss:D
+    }
+  }
+  \box_set_wd:Nn \l_tmpa_box { 0 pt }
+  \box_use:N \l_tmpa_box
 }
 
 \cs_set:Nn \__manalysis_stack_center_pad_clist:Nn {
-	\clist_set:Nn #1 { #2 }
-	\int_compare:nNnT { \clist_count:N #1 } < 4 {
-			\exp_args:NNe \clist_put_right:Nn #1 { \clist_item:Nn #1 { \clist_count:N #1 } }
-			\exp_args:NNe \clist_put_right:Nn #1 { \clist_item:Nn #1 { \clist_count:N #1 } }
-			\exp_args:NNe \clist_put_right:Nn #1 { \clist_item:Nn #1 { \clist_count:N #1 } }
-		}
+  \clist_set:Nn #1 { #2 }
+  \int_compare:nNnT { \clist_count:N #1 } < 4 {
+      \exp_args:NNe \clist_put_right:Nn #1 { \clist_item:Nn #1 { \clist_count:N #1 } }
+      \exp_args:NNe \clist_put_right:Nn #1 { \clist_item:Nn #1 { \clist_count:N #1 } }
+      \exp_args:NNe \clist_put_right:Nn #1 { \clist_item:Nn #1 { \clist_count:N #1 } }
+    }
 }
 
 \DeclareDocumentCommand { \stackcenter } { s O{ 0.5, 0.5, 0.5, 0.5 } O{ 0, 0, 0, 0 } O{ 0, 0, 0, 0 } O{ 1, 1, 1, 1 } mm } {
-	% hskip, rotate, vskip, hscale
-	\tex_mathopen:D {
-		\__manalysis_stack_center_pad_clist:Nn \l__manalysis_tmpb_clist { #2 }
-		\__manalysis_stack_center_pad_clist:Nn \l_tmpa_clist { #3 }
-		\__manalysis_stack_center_pad_clist:Nn \l_tmpb_clist { #4 }
-		\__manalysis_stack_center_pad_clist:Nn \l__manalysis_tmpa_clist { #5 }
-		\tex_mathchoice:D {
-			\__manalysis_stack_center:nnn { \tex_displaystyle:D #7 }
-			{ \tex_displaystyle:D #6 } { 1 }
-		} {
-			\__manalysis_stack_center:nnn { \tex_textstyle:D #7 }
-			{ \tex_textstyle:D #6 } { 2 }
-		} {
-			\__manalysis_stack_center:nnn { \tex_scriptstyle:D #7 }
-			{ \tex_scriptstyle:D #6 } { 3 }
-		} {
-			\__manalysis_stack_center:nnn { \tex_scriptscriptstyle:D #7 }
-			{ \tex_scriptscriptstyle:D #6 } { 4 }
-		}
-	}
-	\tex_mathopen:D { }
-	\IfBooleanTF { #1 } {
-		\tex_mathop:D { \__manalysis_mathpalette:nn \__manalysis_stack_center_fbox:nn #7 }
-		\tex_mathopen:D { } #7
-	} { #7 }
+  % hskip, rotate, vskip, hscale
+  \tex_mathopen:D {
+    \__manalysis_stack_center_pad_clist:Nn \l__manalysis_tmpb_clist { #2 }
+    \__manalysis_stack_center_pad_clist:Nn \l_tmpa_clist { #3 }
+    \__manalysis_stack_center_pad_clist:Nn \l_tmpb_clist { #4 }
+    \__manalysis_stack_center_pad_clist:Nn \l__manalysis_tmpa_clist { #5 }
+    \tex_mathchoice:D {
+      \__manalysis_stack_center:nnn { \tex_displaystyle:D #7 }
+      { \tex_displaystyle:D #6 } { 1 }
+    } {
+      \__manalysis_stack_center:nnn { \tex_textstyle:D #7 }
+      { \tex_textstyle:D #6 } { 2 }
+    } {
+      \__manalysis_stack_center:nnn { \tex_scriptstyle:D #7 }
+      { \tex_scriptstyle:D #6 } { 3 }
+    } {
+      \__manalysis_stack_center:nnn { \tex_scriptscriptstyle:D #7 }
+      { \tex_scriptscriptstyle:D #6 } { 4 }
+    }
+  }
+  \tex_mathopen:D { }
+  \IfBooleanTF { #1 } {
+    \tex_mathop:D { \__manalysis_mathpalette:nn \__manalysis_stack_center_fbox:nn #7 }
+    \tex_mathopen:D { } #7
+  } { #7 }
 }
-
-\ExplSyntaxOff
