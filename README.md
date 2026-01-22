@@ -34,7 +34,6 @@ The latter command will load all modules.
 | `manalysis-accent.sty`      | Auxiliary module for automatically adjusting the width of accents in formulas           |
 | `manalysis-bigop.sty`       | Auxiliary module for converting arbitrary mathematical expressions into large operators |
 | `manalysis-paren.sty`       | Auxiliary module for automatically adjusting the height of parentheses in formulas      |
-| `manalysis-paren-lua.sty`   | `paren` module for LuaTeX                                                               |
 | `manalysis-pms.sty`         | Auxiliary module providing poor man's slanted shapes using `l3draw` or TikZ             |
 | `manalysis-rfrac.sty`       | Auxiliary module providing a simple horizontal fraction command based on regex          |
 | `manalysis-stackcenter.sty` | Auxiliary module for centering one symbol over another                                  |
